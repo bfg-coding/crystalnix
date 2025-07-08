@@ -1,233 +1,160 @@
+
 # 🔮 CrystalNix
 
-A universal design system for Nix configurations. Create consistent, themeable interfaces across all your Nix-managed applications—from window managers to terminal emulators to status bars.
+> A universal design system for Nix configurations
 
-## Features
+CrystalNix is a powerful design system that transforms raw theme values into format-specific outputs for any application. Define your colors, spacing, and typography once, then use them everywhere - from Hyprland to CSS to terminal emulators.
 
-- **🎨 Universal Design Tokens** - One source of truth for colors, spacing, typography, and more
-- **🌈 Built-in Themes** - Dark, light, minimal, and cyberpunk themes included
-- **🔧 Easy Customization** - Override any token or create custom themes
-- **⚡ Zero Runtime** - All values resolved at Nix evaluation time
-- **🎯 Type Safe** - Nix catches configuration errors before deployment
-- **📦 Flake Ready** - Simple integration with modern Nix workflows
+## ✨ Key Features
 
-## Quick Start
+- **🎨 Universal Theming**: One theme definition works everywhere
+- **📱 Multi-Format Output**: Colors as hex, conf, RGB; spacing as px, rem, raw
+- **🔧 Application-Ready**: Built-in support for Hyprland, Kitty, i3, CSS, and more
+- **🧩 Extensible**: Easy to add new formats and transform functions
+- **🎯 Type-Safe**: Schema-driven validation ensures consistent outputs
+- **⚡ Flake-Based**: Modern Nix flake for easy dependency management
 
-### 1. Add to your flake inputs
+## 🚀 Quick Start
+
+### Using as a Flake
 
 ```nix
 {
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    crystalnix.url = "github:yourusername/crystalnix";
-  };
-
-  outputs = { self, nixpkgs, crystalnix, ... }: {
-    # Your configuration
-  };
-}
-```
-
-### 2. Use in your configuration
-
-```nix
-# home.nix
-{ config, pkgs, lib, ... }:
-let
-  # Load a theme
-  stylesheet = crystalnix.lib.mkStylesheet { theme = "dark"; };
-in
-{
-  imports = [
-    (import ./hyprland.nix { inherit config pkgs lib stylesheet; })
-    (import ./waybar.nix { inherit config pkgs lib stylesheet; })
-  ];
-}
-```
-
-### 3. Reference tokens in your configs
-
-```nix
-# hyprland.nix
-{ config, pkgs, lib, stylesheet, ... }:
-{
-  wayland.windowManager.hyprland.settings = {
-    general = {
-      gaps_in = stylesheet.layout.spacing.sm;              # 8
-      gaps_out = stylesheet.layout.spacing.md;             # 16  
-      border_size = stylesheet.layout.borders.width.normal; # 2
-      "col.active_border" = stylesheet.visual.colors.primary."500";
-      "col.inactive_border" = stylesheet.visual.colors.border.primary;
-    };
-
-    decoration = {
-      rounding = stylesheet.layout.borders.radius.md;      # 8
-      blur.size = stylesheet.visual.effects.blur.base;     # "blur(8px)"
-      shadow.color = stylesheet.visual.colors.shadow.primary;
-    };
-
-    animations = {
-      animation = [
-        "windows, 1, ${toString stylesheet.motion.duration.normal}, ${stylesheet.motion.easing.smooth}"
-        "fade, 1, ${toString stylesheet.motion.duration.fast}, linear"
-      ];
-    };
-  };
-}
-```
-
-## Available Themes
-
-| Theme | Description |
-|-------|-------------|
-| `dark` | Modern dark theme with blue accents |
-| `light` | Clean light theme with subtle shadows |
-| `minimal` | Monochromatic with reduced spacing and effects |
-| `cyberpunk` | Neon colors with glowing effects |
-
-## Design System Structure
-
-```nix
-stylesheet = {
-  # Layout properties
-  layout = {
-    spacing = { xs = 4; sm = 8; md = 16; lg = 32; xl = 64; /* ... */ };
-    borders = {
-      width = { thin = 1; normal = 2; thick = 4; };
-      radius = { sm = 4; md = 8; lg = 16; full = 9999; };
-    };
-    size = { /* sizing scale */ };
-    breakpoints = { /* responsive breakpoints */ };
-  };
-
-  # Visual properties  
-  visual = {
-    colors = {
-      # Base color scales
-      red = { "50" = "#fef2f2"; "500" = "#ef4444"; /* ... */ };
-      blue = { "50" = "#eff6ff"; "500" = "#3b82f6"; /* ... */ };
-      
-      # Semantic colors (set by themes)
-      primary = { /* theme-specific */ };
-      background = { primary = ""; secondary = ""; /* ... */ };
-      text = { primary = ""; secondary = ""; /* ... */ };
-      border = { primary = ""; focus = ""; /* ... */ };
-    };
-    typography = { /* font families, sizes, weights */ };
-    effects = { shadow = {}; blur = {}; opacity = {}; };
-  };
-
-  # Motion properties
-  motion = {
-    duration = { fast = 150; normal = 250; slow = 400; };
-    easing = { smooth = "cubic-bezier(...)"; linear = "linear"; };
-    delay = { /* timing delays */ };
-  };
-
-  # Interaction properties
-  interaction = {
-    cursor = { timeout = 3; };
-    input = { mouse = {}; keyboard = {}; };
-    focus = { outlineWidth = 2; };
-  };
-
-  # Z-index scale
-  zIndex = { overlay = 1000; modal = 2000; tooltip = 4000; };
-
-  # Helper functions
-  helpers = {
-    rgba = r: g: b: a: "rgba(${r}, ${g}, ${b}, ${a})";
-    px = value: "${toString value}px";
-    /* ... */
-  };
-}
-```
-
-## Customization
-
-### Override specific tokens
-
-```nix
-let
-  stylesheet = crystalnix.lib.mkStylesheet { 
-    theme = "dark";
-    overrides = {
-      visual.colors.accent = "#ff6b6b";
-      layout.spacing.md = 20;
-      motion.duration.normal = 300;
-    };
-  };
-```
-
-### Create a custom theme
-
-```nix
-# themes/gruvbox.nix
-{ baseStylesheet, lib }:
-baseStylesheet // {
-  visual = baseStylesheet.visual // {
-    colors = baseStylesheet.visual.colors // {
-      primary = { "500" = "#458588"; };
-      accent = "#d65d0e";
-      
-      background = {
-        primary = "#282828";
-        secondary = "#3c3836";
-      };
-      
-      text = {
-        primary = "#ebdbb2";
-        secondary = "#d79921";
+  inputs.crystalnix.url = "github:you/crystalnix";
+  
+  outputs = { crystalnix, ... }: {
+    # Use built-in themes
+    darkTheme = crystalnix.lib.mkStylesheet { theme = "dark"; };
+    lightTheme = crystalnix.lib.mkStylesheet { theme = "light"; };
+    
+    # Or create custom theme
+    myTheme = crystalnix.lib.mkStylesheet { 
+      theme = "dark"; 
+      overrides = {
+        colors.primary."500" = "#ff6b6b";
       };
     };
   };
 }
 ```
 
-### Use helpers for complex values
+### Usage Examples
 
 ```nix
+# Colors in different formats
+stylesheet.colors.primary."500".hex     # "#3b82f6" (CSS)
+stylesheet.colors.primary."500".conf    # "3b82f6"  (Hyprland)
+stylesheet.colors.primary."500".rgb     # { r = 59; g = 130; b = 246; }
+
+# Spacing in different units  
+stylesheet.spacing.md.px                # "16px"
+stylesheet.spacing.md.rem               # "1rem"
+stylesheet.spacing.md.raw               # 16
+
+# Typography formats
+stylesheet.typography.fontFamily.sans.css    # "Inter, system-ui, ..."
+stylesheet.typography.fontFamily.sans.single # "Inter"
+```
+
+## 📁 Project Structure
+
+```
+crystalnix/
+├── flake.nix                    # Main flake entry point
+├── lib/                         # Core design system library
+│   ├── default.nix             # Main exports (processTheme, etc.)
+│   ├── utils.nix               # Helper functions (hex conversion, etc.)
+│   ├── defaults.nix            # Configuration defaults
+│   ├── schema.nix              # Transform schema mapping
+│   ├── processor.nix           # Core theme processor
+│   ├── transforms/             # Transform functions
+│   │   ├── default.nix         # Transform registry
+│   │   ├── colors.nix          # Color transforms (hex, conf, rgb)
+│   │   ├── spacing.nix         # Spacing transforms (px, rem, raw)
+│   │   ├── typography.nix      # Typography transforms
+│   │   ├── motion.nix          # Motion/timing transforms
+│   │   └── effects.nix         # Effects transforms (opacity, shadows)
+│   └── themes/                 # Built-in themes
+│       ├── default.nix         # Theme registry
+│       ├── dark.nix            # Dark theme (raw values)
+│       └── light.nix           # Light theme (raw values)
+└── README.md                   # This file
+```
+
+## 🎨 Creating Themes
+
+Themes contain only raw values - the system handles all format conversions:
+
+```nix
+# mytheme.nix
 {
-  wayland.windowManager.hyprland.settings = {
-    decoration.shadow = {
-      color = stylesheet.helpers.rgba 0 0 0 0.8;
-      range = stylesheet.helpers.px stylesheet.layout.spacing.md;
+  colors = {
+    primary = {
+      "500" = "#3b82f6";    # Raw hex color
+    };
+    background = {
+      primary = "#0f172a";
+    };
+  };
+  
+  spacing = {
+    md = 16;                # Raw pixel value
+    lg = 32;
+  };
+  
+  typography = {
+    fontFamily = {
+      sans = ["Inter" "system-ui" "sans-serif"];  # Raw font list
+    };
+    fontSize = {
+      base = 16;            # Raw pixel size
     };
   };
 }
 ```
 
-## Real-world Examples
-
-### Waybar Configuration
+The system automatically transforms these into:
 
 ```nix
-# waybar.nix
-{ stylesheet, ... }:
+# After processing
 {
-  programs.waybar = {
-    enable = true;
-    style = ''
-      * {
-        font-family: ${lib.concatStringsSep ", " stylesheet.visual.typography.fontFamily.sans};
-        font-size: ${stylesheet.helpers.px stylesheet.visual.typography.fontSize.sm.size};
-      }
+  colors.primary."500" = {
+    hex = "#3b82f6";
+    conf = "3b82f6";
+    rgb = { r = 59; g = 130; b = 246; };
+    rgbString = "59,130,246";
+  };
+  
+  spacing.md = {
+    px = "16px";
+    rem = "1rem";
+    raw = 16;
+  };
+  
+  typography.fontFamily.sans = {
+    css = "Inter, system-ui, sans-serif";
+    single = "Inter";
+    raw = ["Inter" "system-ui" "sans-serif"];
+  };
+}
+```
 
-      window#waybar {
-        background-color: ${stylesheet.visual.colors.background.secondary};
-        color: ${stylesheet.visual.colors.text.primary};
-        border-radius: ${stylesheet.helpers.px stylesheet.layout.borders.radius.md};
-      }
+## 🔧 Application Configs
 
-      .modules-left > widget:first-child > #workspaces {
-        margin-left: ${stylesheet.helpers.px stylesheet.layout.spacing.md};
-      }
+### Hyprland
 
-      #workspaces button.active {
-        background-color: ${stylesheet.visual.colors.primary."500"};
-        color: ${stylesheet.visual.colors.text.inverse};
-      }
-    '';
+```nix
+{
+  general = {
+    col.active_border = stylesheet.colors.primary."500".conf;
+    col.inactive_border = stylesheet.colors.border.primary.conf;
+    border_size = stylesheet.borders.width.normal.raw;
+    gaps_in = stylesheet.spacing.sm.raw;
+    gaps_out = stylesheet.spacing.md.raw;
+  };
+  
+  decoration = {
+    rounding = stylesheet.borders.radius.md.raw;
   };
 }
 ```
@@ -235,69 +162,202 @@ baseStylesheet // {
 ### Kitty Terminal
 
 ```nix
-# kitty.nix
-{ stylesheet, ... }:
 {
-  programs.kitty = {
-    enable = true;
-    font = {
-      name = builtins.head stylesheet.visual.typography.fontFamily.mono;
-      size = stylesheet.visual.typography.fontSize.base.size;
-    };
-    settings = {
-      foreground = stylesheet.visual.colors.text.primary;
-      background = stylesheet.visual.colors.background.primary;
-      cursor = stylesheet.visual.colors.primary."500";
-      
-      # Selection colors
-      selection_foreground = stylesheet.visual.colors.text.inverse;
-      selection_background = stylesheet.visual.colors.primary."500";
-      
-      # Window styling
-      window_padding_width = stylesheet.layout.spacing.md;
-      background_opacity = toString stylesheet.visual.effects.opacity."95";
-    };
+  background = stylesheet.colors.background.primary.hex;
+  foreground = stylesheet.colors.text.primary.hex;
+  cursor = stylesheet.colors.primary."500".hex;
+  font_family = stylesheet.typography.fontFamily.mono.single;
+  font_size = stylesheet.typography.fontSize.base.raw;
+}
+```
+
+### CSS Variables
+
+```css
+:root {
+  --color-primary: #{stylesheet.colors.primary."500".hex};
+  --spacing-md: #{stylesheet.spacing.md.px};
+  --font-family: #{stylesheet.typography.fontFamily.sans.css};
+  --duration-fast: #{stylesheet.motion.duration.fast.ms};
+}
+```
+
+### i3/Sway
+
+```nix
+{
+  set = {
+    "$bg" = stylesheet.colors.background.primary.hex;
+    "$fg" = stylesheet.colors.text.primary.hex;
+    "$accent" = stylesheet.colors.primary."500".hex;
+  };
+  
+  gaps = {
+    inner = stylesheet.spacing.sm.raw;
+    outer = stylesheet.spacing.xs.raw;
   };
 }
 ```
 
-## Development
+## 🧪 Development & Testing
 
-### List available themes
+### Available Commands
 
 ```bash
+# List available themes
 nix run .#list-themes
+
+# Debug a theme (shows key values and formats)
+nix run .#debug dark
+
+# Compare two themes
+nix run .#compare dark light
+
+# Test format outputs
+nix run .#formats dark
+
+# Run validation tests
+nix run .#validate
+
+# Development shell
+nix develop
 ```
 
-### Preview a theme
+### Built-in Themes
 
-```bash
-nix run .#preview-theme dark
-nix eval .#packages.cyberpunk --json | jq '.visual.colors'
+- **`dark`**: Modern dark theme optimized for terminals and low-light use
+- **`light`**: Clean light theme perfect for documentation and professional apps
+
+### Theme Extending
+
+```nix
+# Extend a built-in theme
+extendedTheme = crystalnix.lib.mkStylesheet {
+  theme = "dark";
+  overrides = {
+    colors.primary."500" = "#ff6b6b";  # Custom accent color
+    spacing.custom = 48;                # Add custom values
+  };
+};
+
+# Or using the helper function
+customTheme = crystalnix.lib.designSystem.extendTheme 
+  crystalnix.lib.designSystem.themes.dark
+  { colors.primary."500" = "#ff6b6b"; };
 ```
 
-### Validate your configuration
+## 🎯 Transform System
 
-```bash
-nix eval .#lib.mkStylesheet --arg theme '"nonexistent"'
-# Error: Theme 'nonexistent' not found. Available themes: dark, light, minimal, cyberpunk
+The transform system automatically converts raw theme values into multiple formats:
+
+### Color Transforms
+- **`hex`**: `"#3b82f6"` (CSS standard)
+- **`conf`**: `"3b82f6"` (Config files, Hyprland)
+- **`rgb`**: `{ r = 59; g = 130; b = 246; }` (Object format)
+- **`rgbString`**: `"59,130,246"` (String format)
+
+### Spacing Transforms
+- **`px`**: `"16px"` (CSS pixels)
+- **`rem`**: `"1rem"` (Relative units)
+- **`raw`**: `16` (Bare number)
+
+### Typography Transforms
+- **`css`**: `"Inter, system-ui, sans-serif"` (CSS font stack)
+- **`single`**: `"Inter"` (Single font for limited configs)
+- **`raw`**: `["Inter" "system-ui" "sans-serif"]` (Array format)
+
+### Motion Transforms
+- **`ms`**: `"300ms"` (CSS milliseconds)
+- **`s`**: `"0.3s"` (CSS seconds)
+- **`raw`**: `300` (Bare number)
+
+## 🔌 Extending the System
+
+### Adding New Transforms
+
+```nix
+# lib/transforms/myTransform.nix
+{ lib, utils, defaults }:
+
+{
+  # Transform function takes raw value, returns format object
+  myTransform = value: {
+    raw = value;
+    custom = "custom-${toString value}";
+    # ... other formats
+  };
+}
 ```
 
-## Roadmap
+### Adding New Schema Mappings
 
-- [ ] Additional built-in themes (nord, gruvbox, dracula)
-- [ ] Theme validation and linting tools  
-- [ ] CSS/JSON export for non-Nix applications
-- [ ] Documentation site with interactive theme preview
-- [ ] Integration examples for popular applications
+```nix
+# lib/schema.nix
+{
+  # ... existing mappings
+  myNewSection = "myTransform";  # Apply myTransform to this path
+}
+```
 
-## Contributing
+### Adding New Themes
+
+```nix
+# themes/cyberpunk.nix
+{
+  colors = {
+    primary."500" = "#00ff41";  # Matrix green
+    background.primary = "#0d1421";
+    # ... rest of theme
+  };
+  # ... other theme properties
+}
+```
+
+## 📖 API Reference
+
+### Main Functions
+
+- **`processTheme rawTheme`**: Transform raw theme into stylesheet
+- **`mkStylesheet { theme, overrides }`**: Process theme with optional overrides
+- **`extendTheme baseTheme overrides`**: Merge themes recursively
+
+### Built-in Themes
+
+- **`themes.dark`**: Dark theme optimized for terminals
+- **`themes.light`**: Light theme for documentation/professional use
+
+### Utilities
+
+- **`utils.hexToRgb`**: Convert hex to RGB components
+- **`utils.toPx`**: Convert number to pixel string
+- **`utils.toRem`**: Convert pixels to rem units
+- **`utils.fontListToCss`**: Convert font array to CSS string
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a theme in `themes/yourtheme.nix`  
-3. Test with `nix eval .#lib.mkStylesheet --arg theme '"yourtheme"'`
-4. Submit a pull request
+2. Create a feature branch
+3. Add your changes (transforms, themes, etc.)
+4. Run validation: `nix run .#validate`
+5. Submit a pull request
 
-## License
+### Guidelines
 
-MIT License - see [LICENSE](LICENSE) for details.
+- Keep themes minimal (raw values only)
+- Add transform tests for new formats
+- Update documentation for new features
+- Follow the existing naming conventions
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Inspired by design systems like Tailwind CSS and Material Design
+- Built with the power and flexibility of Nix
+- Thanks to the Nix community for feedback and contributions
+
+---
+
+**🔮 Transform your configurations with CrystalNix - one theme, infinite possibilities.**

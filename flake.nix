@@ -13,6 +13,9 @@
           pkgs = nixpkgs.legacyPackages.${system};
           lib = nixpkgs.lib;
 
+          # Import our design system library
+          designSystem = import ./lib { inherit lib; };
+
           # Auto-discover available themes
           themesDir = ./themes;
           availableThemeFiles = builtins.filter
@@ -20,23 +23,24 @@
             (builtins.attrNames (builtins.readDir themesDir));
           availableThemes = map (name: lib.removeSuffix ".nix" name) availableThemeFiles;
 
-          # Main stylesheet function
+          # Main stylesheet function - now using processTheme
           mkStylesheet = { theme ? "dark", overrides ? { } }:
             let
-              baseStylesheet = import ./stylesheets/base.nix { inherit lib; };
-
               # Validate theme exists
               themeFile = themesDir + "/${theme}.nix";
               themeExists = builtins.pathExists themeFile;
 
-              # Load the selected theme
-              selectedTheme =
+              # Load the selected raw theme
+              rawTheme =
                 if themeExists
-                then import themeFile { inherit baseStylesheet lib; }
+                then import themeFile { inherit lib; }
                 else throw "Theme '${theme}' not found. Available themes: ${lib.concatStringsSep ", " availableThemes}";
 
-              # Apply overrides recursively
-              finalStylesheet = lib.recursiveUpdate selectedTheme overrides;
+              # Apply overrides to raw theme before processing
+              rawThemeWithOverrides = lib.recursiveUpdate rawTheme overrides;
+
+              # Process the raw theme into full stylesheet
+              finalStylesheet = designSystem.processTheme rawThemeWithOverrides;
             in
             finalStylesheet // {
               # Expose metadata for tooling/discovery
@@ -44,6 +48,9 @@
                 inherit availableThemes;
                 currentTheme = theme;
                 hasOverrides = overrides != { };
+                # Add info about the design system
+                designSystemVersion = "2.0.0";
+                transformsApplied = true;
               };
             };
         in
@@ -52,6 +59,10 @@
           lib = {
             inherit mkStylesheet;
             listThemes = availableThemes;
+
+            # Also expose the design system for advanced usage
+            inherit (designSystem) processTheme themes;
+            designSystem = designSystem;
           };
 
           # Pre-built themes for easy access
@@ -59,8 +70,6 @@
             default = mkStylesheet { };
             dark = mkStylesheet { theme = "dark"; };
             light = mkStylesheet { theme = "light"; };
-            minimal = mkStylesheet { theme = "minimal"; };
-            cyberpunk = mkStylesheet { theme = "cyberpunk"; };
           };
 
           # Development shell
@@ -74,6 +83,7 @@
               echo "  nix run .#validate    # Run all validation tests"
               echo "  nix run .#debug       # Debug dark theme"
               echo "  nix run .#compare     # Compare dark vs light"
+              echo "  nix run .#formats     # Test format outputs"
               echo ""
               echo "Quick start: nix run .#debug"
             '';
@@ -99,8 +109,8 @@
                 echo "🔮 CrystalNix Debug: $theme theme"
                 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
               
-                # Check if theme exists by trying to access the prebuilt package
-                if ! nix eval .#packages.x86_64-linux.$theme._meta --json >/dev/null 2>&1; then
+                # Check if theme exists by trying to evaluate it
+                if ! nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json >/dev/null 2>&1; then
                   echo "❌ Theme '$theme' not found"
                   echo ""
                   echo "Available themes:"
@@ -108,40 +118,69 @@
                   exit 1
                 fi
               
-                # Load the theme and extract key info using prebuilt packages
+                # Load the theme and extract key info
                 echo "📊 Theme Metadata:"
-                nix eval .#packages.x86_64-linux.$theme._meta --json | ${pkgs.jq}/bin/jq -r 'to_entries[] | "  \(.key): \(.value)"'
+                nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '._meta | to_entries[] | "  \(.key): \(.value)"'
               
                 echo ""
-                echo "🎨 Key Colors:"
-                nix eval .#packages.x86_64-linux.$theme.visual.colors --json | ${pkgs.jq}/bin/jq -r '{
-                  "primary-500": .primary."500",
-                  "background-primary": .background.primary,
-                  "text-primary": .text.primary,
-                  "border-primary": .border.primary
-                } | to_entries[] | "  \(.key): \(.value)"'
+                echo "🎨 Key Colors (multiple formats):"
+                echo "  Primary (hex):  $(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".hex')"
+                echo "  Primary (conf): $(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".conf')"
+                echo "  Background:     $(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.background.primary.hex')"
               
                 echo ""
                 echo "📏 Layout Values:"
-                nix eval .#packages.x86_64-linux.$theme.layout --json | ${pkgs.jq}/bin/jq -r '{
-                  "spacing-sm": .spacing.sm,
-                  "spacing-md": .spacing.md,
-                  "spacing-lg": .spacing.lg,
-                  "border-radius-md": .borders.radius.md
-                } | to_entries[] | "  \(.key): \(.value)"'
+                echo "  Spacing md (px):  $(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.spacing.md.px')"
+                echo "  Spacing md (rem): $(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.spacing.md.rem')"
+                echo "  Spacing md (raw): $(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.spacing.md.raw')"
               
                 echo ""
                 echo "⚡ Motion Settings:"
-                nix eval .#packages.x86_64-linux.$theme.motion --json | ${pkgs.jq}/bin/jq -r '{
-                  "duration-fast": .duration.fast,
-                  "duration-normal": .duration.normal,
-                  "easing-smooth": .easing.smooth
-                } | to_entries[] | "  \(.key): \(.value)"'
+                echo "  Duration fast: $(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.motion.duration.fast.ms')"
+                echo "  Easing smooth: $(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.motion.easing.smooth.raw')"
               
                 echo ""
-                echo "💡 Usage example:"
-                echo "  stylesheet.visual.colors.primary.\"500\"  # $(nix eval .#packages.x86_64-linux.$theme.visual.colors.primary.\"500\" --raw)"
-                echo "  stylesheet.layout.spacing.md            # $(nix eval .#packages.x86_64-linux.$theme.layout.spacing.md)"
+                echo "💡 Usage examples:"
+                echo "  # Hyprland config"
+                echo "  stylesheet.colors.primary.\"500\".conf"
+                echo "  # CSS"
+                echo "  stylesheet.colors.primary.\"500\".hex"
+                echo "  stylesheet.spacing.md.rem"
+              '');
+            };
+
+            # Test format outputs
+            formats = {
+              type = "app";
+              program = toString (pkgs.writeShellScript "crystalnix-formats" ''
+                theme=''${1:-dark}
+                
+                echo "🔮 CrystalNix Format Testing: $theme theme"
+                echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                
+                echo "🎨 Color Formats:"
+                primary_hex=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".hex')
+                primary_conf=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".conf')
+                echo "  .hex:  $primary_hex"
+                echo "  .conf: $primary_conf"
+                
+                echo ""
+                echo "📏 Spacing Formats:"
+                spacing_px=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.spacing.md.px') 
+                spacing_rem=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.spacing.md.rem')
+                spacing_raw=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.spacing.md.raw')
+                echo "  .px:  $spacing_px"
+                echo "  .rem: $spacing_rem" 
+                echo "  .raw: $spacing_raw"
+                
+                echo ""
+                echo "⏱️  Duration Formats:"
+                duration_ms=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.motion.duration.fast.ms')
+                duration_s=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.motion.duration.fast.s')
+                duration_raw=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme\"; }" --json | ${pkgs.jq}/bin/jq -r '.motion.duration.fast.raw')
+                echo "  .ms:  $duration_ms"
+                echo "  .s:   $duration_s"
+                echo "  .raw: $duration_raw"
               '');
             };
 
@@ -155,14 +194,14 @@
                 echo "🔮 Comparing CrystalNix Themes: $theme1 vs $theme2"
                 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
               
-                # Get theme data using prebuilt packages
-                t1_primary=$(nix eval .#packages.x86_64-linux.$theme1.visual.colors.primary.\"500\" --raw)
-                t1_bg=$(nix eval .#packages.x86_64-linux.$theme1.visual.colors.background.primary --raw)
-                t1_spacing=$(nix eval .#packages.x86_64-linux.$theme1.layout.spacing.md)
+                # Get theme data using the lib
+                t1_primary=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme1\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".hex')
+                t1_bg=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme1\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.background.primary.hex')
+                t1_spacing=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme1\"; }" --json | ${pkgs.jq}/bin/jq -r '.spacing.md.px')
               
-                t2_primary=$(nix eval .#packages.x86_64-linux.$theme2.visual.colors.primary.\"500\" --raw)
-                t2_bg=$(nix eval .#packages.x86_64-linux.$theme2.visual.colors.background.primary --raw)
-                t2_spacing=$(nix eval .#packages.x86_64-linux.$theme2.layout.spacing.md)
+                t2_primary=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme2\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".hex')
+                t2_bg=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme2\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.background.primary.hex')
+                t2_spacing=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"$theme2\"; }" --json | ${pkgs.jq}/bin/jq -r '.spacing.md.px')
               
                 echo "🎨 Primary Colors:"
                 echo "  $theme1: $t1_primary"
@@ -203,7 +242,7 @@
                 echo "📋 Test 1: Theme Loading"
                 ${lib.concatMapStringsSep "\n" (theme: ''
                   echo -n "  Testing ${theme}... "
-                  if nix eval .#lib.mkStylesheet --arg theme '"${theme}"' --json >/dev/null 2>&1; then
+                  if nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"${theme}\"; }" --json >/dev/null 2>&1; then
                     echo "✅"
                   else
                     echo "❌"
@@ -211,27 +250,25 @@
                   fi
                 '') availableThemes}
               
-                # Test 2: Check themes are different
+                # Test 2: Check format transforms work
                 echo ""
-                echo "📋 Test 2: Theme Differences"
-                dark_bg=$(nix eval .#lib.mkStylesheet --arg theme '"dark"' --json | ${pkgs.jq}/bin/jq -r '.visual.colors.background.primary')
-                light_bg=$(nix eval .#lib.mkStylesheet --arg theme '"light"' --json | ${pkgs.jq}/bin/jq -r '.visual.colors.background.primary')
-              
-                echo "  Dark background: $dark_bg"
-                echo "  Light background: $light_bg"
-              
-                if [ "$dark_bg" != "$light_bg" ]; then
-                  echo "  ✅ Themes have different backgrounds"
+                echo "📋 Test 2: Format Transforms"
+                echo -n "  Testing color formats... "
+                hex_format=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"dark\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".hex // empty')
+                conf_format=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"dark\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".conf // empty')
+                
+                if [ -n "$hex_format" ] && [ -n "$conf_format" ] && [ "$hex_format" != "$conf_format" ]; then
+                  echo "✅"
                 else
-                  echo "  ❌ Themes have identical backgrounds"
+                  echo "❌"
                   ((errors++))
                 fi
               
                 # Test 3: Check overrides work
                 echo ""
                 echo "📋 Test 3: Override Functionality"
-                original=$(nix eval .#lib.mkStylesheet --arg theme '"dark"' --json | ${pkgs.jq}/bin/jq -r '.visual.colors.primary."500"')
-                override=$(nix eval .#lib.mkStylesheet --arg theme '"dark"' --arg overrides '{ visual.colors.primary."500" = "#ff0000"; }' --json | ${pkgs.jq}/bin/jq -r '.visual.colors.primary."500"')
+                original=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"dark\"; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".hex')
+                override=$(nix eval .#lib --apply "lib: lib.mkStylesheet { theme = \"dark\"; overrides = { colors.primary.\"500\" = \"#ff0000\"; }; }" --json | ${pkgs.jq}/bin/jq -r '.colors.primary."500".hex')
               
                 echo "  Original: $original"  
                 echo "  Override: $override"
@@ -248,6 +285,7 @@
                   echo "🎉 All tests passed! CrystalNix is working correctly."
                   echo ""
                   echo "Try: nix run .#debug dark"
+                  echo "Try: nix run .#formats dark"
                 else
                   echo "💥 $errors test(s) failed"
                   exit 1
@@ -261,14 +299,21 @@
         mkStylesheet = { theme ? "dark", overrides ? { } }:
           let
             lib = nixpkgs.lib;
-            baseStylesheet = import ./stylesheets/base.nix { inherit lib; };
-            themeFile = ./themes + "/${theme}.nix";
-            selectedTheme = import themeFile { inherit baseStylesheet lib; };
-            finalStylesheet = lib.recursiveUpdate selectedTheme overrides;
+            designSystem = import ./lib { inherit lib; };
+            rawTheme = import (./themes + "/${theme}.nix") { inherit lib; };
+            rawThemeWithOverrides = lib.recursiveUpdate rawTheme overrides;
+            finalStylesheet = designSystem.processTheme rawThemeWithOverrides;
           in
           finalStylesheet // {
-            _meta = { currentTheme = theme; hasOverrides = overrides != { }; };
+            _meta = {
+              currentTheme = theme;
+              hasOverrides = overrides != { };
+              designSystemVersion = "2.0.0";
+            };
           };
+
+        # Also expose the design system components
+        processTheme = (import ./lib { inherit (nixpkgs) lib; }).processTheme;
       };
     };
 }
