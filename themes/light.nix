@@ -1,8 +1,8 @@
-# Design System - Light Theme
-# lib/themes/light.nix
+# Design System - Enhanced Light Theme (Phase 1 Ready)
+# themes/light.nix
 #
-# A clean light theme optimized for documentation, professional apps, and daytime use
-# Contains only raw values - will be processed into multiple formats
+# A comprehensive light theme that matches the dark theme's structure
+# Optimized for documentation, professional apps, and daytime use
 
 { lib }:
 
@@ -12,27 +12,9 @@
   # ═══════════════════════════════════════════════════════════════════════════
 
   colors = {
-    # ─────────────────────────────────────────────────────────────────────────
-    # NEUTRAL COLORS (grays for backgrounds, text, borders)
-    # ─────────────────────────────────────────────────────────────────────────
-
-    neutral = {
-      "50" = "#f8fafc"; # Lightest background
-      "100" = "#f1f5f9"; # Card backgrounds
-      "200" = "#e2e8f0"; # Subtle borders
-      "300" = "#cbd5e1"; # Borders
-      "400" = "#94a3b8"; # Muted text
-      "500" = "#64748b"; # Secondary text
-      "600" = "#475569"; # Primary text
-      "700" = "#334155"; # Dark text
-      "800" = "#1e293b"; # Headings
-      "900" = "#0f172a"; # Darkest text
-      "950" = "#020617"; # Maximum contrast
-    };
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # BRAND COLORS (primary interface colors) - Same as dark theme
-    # ─────────────────────────────────────────────────────────────────────────
+    # ═══════════════════════════════════════════════════════════════════════════
+    # BRAND COLORS (primary interface colors)
+    # ═══════════════════════════════════════════════════════════════════════════
 
     primary = {
       "50" = "#eff6ff";
@@ -48,9 +30,9 @@
       "950" = "#172554";
     };
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # SEMANTIC COLORS (status, feedback) - Same as dark theme
-    # ─────────────────────────────────────────────────────────────────────────
+    # ═══════════════════════════════════════════════════════════════════════════
+    # SEMANTIC COLORS (status, feedback)
+    # ═══════════════════════════════════════════════════════════════════════════
 
     success = {
       "50" = "#f0fdf4";
@@ -91,14 +73,125 @@
       "900" = "#7f1d1d";
     };
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # SEMANTIC ALIASES (inverted from dark theme)
-    # ─────────────────────────────────────────────────────────────────────────
+    # ═══════════════════════════════════════════════════════════════════════════
+    # UTILITY COLOR PALETTES (light-optimized)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    # Primary neutral palette (warm grays)
+    slate = {
+      "50" = "#f8fafc"; # Lightest backgrounds
+      "100" = "#f1f5f9"; # Card backgrounds
+      "200" = "#e2e8f0"; # Subtle borders
+      "300" = "#cbd5e1"; # Borders
+      "400" = "#94a3b8"; # Muted text
+      "500" = "#64748b"; # Secondary text
+      "600" = "#475569"; # Primary text
+      "700" = "#334155"; # Dark text
+      "800" = "#1e293b"; # Headings
+      "900" = "#0f172a"; # Darkest text
+      "950" = "#020617"; # Maximum contrast
+    };
+
+    # Alternative neutral palette (cooler grays)
+    zinc = {
+      "50" = "#fafafa"; # Alternative light bg
+      "100" = "#f4f4f5"; # Alternative card bg
+      "200" = "#e4e4e7"; # Alternative borders
+      "300" = "#d4d4d8"; # Alternative muted
+      "400" = "#a1a1aa"; # Alternative text
+      "500" = "#71717a"; # Alternative secondary
+      "600" = "#52525b"; # Alternative primary
+      "700" = "#3f3f46"; # Alternative dark
+      "800" = "#27272a"; # Alternative headings
+      "900" = "#18181b"; # Alternative darkest
+      "950" = "#09090b"; # Alternative max contrast
+    };
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # ACCENT COLORS (for variety and interest)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    secondary = {
+      "50" = "#f0f9ff";
+      "100" = "#e0f2fe";
+      "200" = "#bae6fd";
+      "300" = "#7dd3fc";
+      "400" = "#38bdf8";
+      "500" = "#0ea5e9"; # Secondary blue/cyan
+      "600" = "#0284c7";
+      "700" = "#0369a1";
+      "800" = "#075985";
+      "900" = "#0c4a6e";
+      "950" = "#082f49";
+    };
+
+    accent = {
+      "50" = "#fdf4ff";
+      "100" = "#fae8ff";
+      "200" = "#f5d0fe";
+      "300" = "#f0abfc";
+      "400" = "#e879f9";
+      "500" = "#d946ef"; # Purple accent
+      "600" = "#c026d3";
+      "700" = "#a21caf";
+      "800" = "#86198f";
+      "900" = "#701a75";
+      "950" = "#4a044e";
+    };
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # SURFACE COLORS (for elevation/layering)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    surface = {
+      "0" = "#ffffff"; # Base level (pure white)
+      "1" = "#f8fafc"; # Slightly elevated (very light gray)
+      "2" = "#f1f5f9"; # Cards, modals (light gray)
+      "3" = "#e2e8f0"; # Dropdowns, tooltips (subtle gray)
+      "4" = "#cbd5e1"; # Highest elevation (more visible gray)
+    };
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # UTILITY COLORS (for specific use cases)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    utility = {
+      # Border utilities (light-optimized)
+      border = {
+        subtle = "#f1f5f9"; # Very subtle borders
+        default = "#e2e8f0"; # Standard borders  
+        emphasis = "#cbd5e1"; # Emphasized borders
+        strong = "#94a3b8"; # Strong borders
+        inactive = "#f1f5f9"; # Inactive borders
+      };
+
+      # Text utilities (light-optimized)
+      text = {
+        ghost = "#cbd5e1"; # Very muted text
+        muted = "#94a3b8"; # Muted text
+        subtle = "#64748b"; # Subtle text
+        default = "#0f172a"; # Default text (dark)
+        emphasis = "#020617"; # Emphasized text (darkest)
+      };
+
+      # Overlay utilities (for light backgrounds)
+      overlay = {
+        subtle = "#00000008"; # 3% black overlay
+        light = "#00000020"; # 12% black overlay  
+        medium = "#00000040"; # 25% black overlay
+        heavy = "#00000080"; # 50% black overlay
+      };
+    };
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # SEMANTIC ALIASES (light-optimized)
+    # ═══════════════════════════════════════════════════════════════════════════
 
     background = {
       primary = "#ffffff"; # Main app background (pure white)
       secondary = "#f8fafc"; # Card/panel background (very light gray)
       tertiary = "#f1f5f9"; # Elevated surfaces (light gray)
+      quaternary = "#e2e8f0"; # Highest surfaces (subtle gray)
       inverse = "#0f172a"; # Dark background (for contrast)
     };
 
@@ -108,13 +201,17 @@
       tertiary = "#94a3b8"; # Disabled text (light gray)
       inverse = "#ffffff"; # Light text (on dark backgrounds)
       accent = "#2563eb"; # Link/accent text (slightly darker blue)
+      ghost = "#cbd5e1"; # Very subtle text
     };
 
     border = {
       primary = "#e2e8f0"; # Default borders (light gray)
       secondary = "#f1f5f9"; # Subtle borders (very light)
+      tertiary = "#f8fafc"; # Very subtle borders
       focus = "#3b82f6"; # Focus outlines (brand blue)
       error = "#ef4444"; # Error borders (red)
+      inactive = "#f1f5f9"; # Inactive borders
+      emphasis = "#cbd5e1"; # Emphasized borders
     };
   };
 
@@ -309,11 +406,11 @@
   };
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # EFFECTS SYSTEM (slightly adjusted for light theme)
+  # EFFECTS SYSTEM (light-optimized shadows)
   # ═══════════════════════════════════════════════════════════════════════════
 
   effects = {
-    # Shadows (lighter, more subtle for light backgrounds)
+    # Shadows (subtle for light backgrounds)
     shadow = {
       none = "none";
       sm = "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
@@ -321,7 +418,7 @@
       md = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
       lg = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
       xl = "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)";
-      "2xl" = "0 25px 50px -12px rgba(0, 0, 0, 0.15)"; # Slightly lighter than dark theme
+      "2xl" = "0 25px 50px -12px rgba(0, 0, 0, 0.15)"; # Lighter than dark theme
       inner = "inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)";
     };
 

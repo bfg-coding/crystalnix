@@ -11,29 +11,13 @@
   # COLOR SYSTEM
   # ═══════════════════════════════════════════════════════════════════════════
 
+
   colors = {
-    # ─────────────────────────────────────────────────────────────────────────
-    # NEUTRAL COLORS (grays for backgrounds, text, borders)
-    # ─────────────────────────────────────────────────────────────────────────
+    # ═══════════════════════════════════════════════════════════════════════════
+    # SEMANTIC COLORS (keep existing)
+    # ═══════════════════════════════════════════════════════════════════════════
 
-    neutral = {
-      "50" = "#fafafa"; # Lightest - for light mode compatibility
-      "100" = "#f4f4f5";
-      "200" = "#e4e4e7";
-      "300" = "#d4d4d8";
-      "400" = "#a1a1aa"; # Mid-tone
-      "500" = "#71717a";
-      "600" = "#52525b";
-      "700" = "#3f3f46"; # Dark surfaces
-      "800" = "#27272a"; # Card backgrounds
-      "900" = "#18181b"; # Primary background
-      "950" = "#09090b"; # Deepest background
-    };
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # BRAND COLORS (primary interface colors)
-    # ─────────────────────────────────────────────────────────────────────────
-
+    # Keep your existing primary, success, warning, error colors...
     primary = {
       "50" = "#eff6ff";
       "100" = "#dbeafe";
@@ -48,57 +32,126 @@
       "950" = "#172554";
     };
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # SEMANTIC COLORS (status, feedback)
-    # ─────────────────────────────────────────────────────────────────────────
+    # Keep existing neutral, success, warning, error...
 
-    success = {
-      "50" = "#f0fdf4";
-      "100" = "#dcfce7";
-      "200" = "#bbf7d0";
-      "300" = "#86efac";
-      "400" = "#4ade80";
-      "500" = "#22c55e"; # Success green
-      "600" = "#16a34a";
-      "700" = "#15803d";
-      "800" = "#166534";
-      "900" = "#14532d";
+    # ═══════════════════════════════════════════════════════════════════════════
+    # UTILITY COLOR PALETTES
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    # Additional gray variations for fine-tuning
+    slate = {
+      "50" = "#f8fafc";
+      "100" = "#f1f5f9";
+      "200" = "#e2e8f0";
+      "300" = "#cbd5e1";
+      "400" = "#94a3b8";
+      "500" = "#64748b";
+      "600" = "#475569";
+      "700" = "#334155";
+      "800" = "#1e293b";
+      "900" = "#0f172a";
+      "950" = "#020617";
     };
 
-    warning = {
-      "50" = "#fffbeb";
-      "100" = "#fef3c7";
-      "200" = "#fde68a";
-      "300" = "#fcd34d";
-      "400" = "#fbbf24";
-      "500" = "#f59e0b"; # Warning orange
-      "600" = "#d97706";
-      "700" = "#b45309";
-      "800" = "#92400e";
-      "900" = "#78350f";
+    zinc = {
+      "50" = "#fafafa";
+      "100" = "#f4f4f5";
+      "200" = "#e4e4e7";
+      "300" = "#d4d4d8";
+      "400" = "#a1a1aa";
+      "500" = "#71717a";
+      "600" = "#52525b";
+      "700" = "#3f3f46";
+      "800" = "#27272a";
+      "900" = "#18181b";
+      "950" = "#09090b";
     };
 
-    error = {
-      "50" = "#fef2f2";
-      "100" = "#fee2e2";
-      "200" = "#fecaca";
-      "300" = "#fca5a5";
-      "400" = "#f87171";
-      "500" = "#ef4444"; # Error red
-      "600" = "#dc2626";
-      "700" = "#b91c1c";
-      "800" = "#991b1b";
-      "900" = "#7f1d1d";
+    # ═══════════════════════════════════════════════════════════════════════════
+    # ACCENT COLORS (for variety)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    secondary = {
+      "50" = "#f0f9ff";
+      "100" = "#e0f2fe";
+      "200" = "#bae6fd";
+      "300" = "#7dd3fc";
+      "400" = "#38bdf8";
+      "500" = "#0ea5e9"; # Secondary blue/cyan
+      "600" = "#0284c7";
+      "700" = "#0369a1";
+      "800" = "#075985";
+      "900" = "#0c4a6e";
+      "950" = "#082f49";
     };
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # SEMANTIC ALIASES (for easy theme switching)
-    # ─────────────────────────────────────────────────────────────────────────
+    accent = {
+      "50" = "#fdf4ff";
+      "100" = "#fae8ff";
+      "200" = "#f5d0fe";
+      "300" = "#f0abfc";
+      "400" = "#e879f9";
+      "500" = "#d946ef"; # Purple accent
+      "600" = "#c026d3";
+      "700" = "#a21caf";
+      "800" = "#86198f";
+      "900" = "#701a75";
+      "950" = "#4a044e";
+    };
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # SURFACE COLORS (for elevation/layering)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    surface = {
+      "0" = "#09090b"; # Base level
+      "1" = "#18181b"; # Slightly elevated
+      "2" = "#27272a"; # Cards, modals
+      "3" = "#3f3f46"; # Dropdowns, tooltips
+      "4" = "#52525b"; # Highest elevation
+    };
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # UTILITY COLORS (for specific use cases)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    utility = {
+      # Borders
+      border = {
+        subtle = "#27272a"; # Very subtle borders
+        default = "#3f3f46"; # Standard borders  
+        emphasis = "#52525b"; # Emphasized borders
+        strong = "#71717a"; # Strong borders
+        inactive = "#27272a"; # Perfect for your inactive border!
+      };
+
+      # Text utilities
+      text = {
+        ghost = "#52525b"; # Very muted text
+        muted = "#71717a"; # Muted text
+        subtle = "#a1a1aa"; # Subtle text
+        default = "#fafafa"; # Default text
+        emphasis = "#ffffff"; # Emphasized text
+      };
+
+      # Surface utilities
+      overlay = {
+        subtle = "#00000008"; # 3% black overlay
+        light = "#00000020"; # 12% black overlay  
+        medium = "#00000040"; # 25% black overlay
+        heavy = "#00000080"; # 50% black overlay
+      };
+    };
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # SEMANTIC ALIASES (enhanced)
+    # ═══════════════════════════════════════════════════════════════════════════
 
     background = {
       primary = "#09090b"; # Main app background
       secondary = "#18181b"; # Card/panel background
       tertiary = "#27272a"; # Elevated surfaces
+      quaternary = "#3f3f46"; # Highest surfaces
       inverse = "#fafafa"; # Light background (for contrast)
     };
 
@@ -108,13 +161,17 @@
       tertiary = "#71717a"; # Disabled text
       inverse = "#18181b"; # Dark text (on light backgrounds)
       accent = "#3b82f6"; # Link/accent text
+      ghost = "#52525b"; # Very subtle text
     };
 
     border = {
       primary = "#3f3f46"; # Default borders
       secondary = "#27272a"; # Subtle borders
+      tertiary = "#18181b"; # Very subtle borders
       focus = "#3b82f6"; # Focus outlines
       error = "#ef4444"; # Error borders
+      inactive = "#27272a"; # Inactive borders (your use case!)
+      emphasis = "#52525b"; # Emphasized borders
     };
   };
 
