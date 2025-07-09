@@ -1,5 +1,5 @@
-# Design System - Built-in Themes
-# lib/themes/default.nix
+# Design System - Built-in Themes (Updated)
+# themes/default.nix
 #
 # Exports all built-in raw themes for the design system
 # These themes contain only raw values and will be processed by the system
@@ -17,13 +17,16 @@ rec {
   # Light theme - clean, professional
   light = import ./light.nix { inherit lib; };
 
+  # Tokyo Night theme - vibrant, inspired by Tokyo's neon nights
+  tokyonight = import ./tokyonight.nix { inherit lib; };
+
   # ═══════════════════════════════════════════════════════════════════════════
   # THEME REGISTRY
   # ═══════════════════════════════════════════════════════════════════════════
 
   # All available themes
   all = {
-    inherit dark light;
+    inherit dark light tokyonight;
   };
 
   # List of theme names
@@ -56,6 +59,13 @@ rec {
       description = "Clean light theme perfect for documentation and professional use";
       category = "light";
       tags = [ "clean" "professional" "accessible" ];
+    };
+
+    tokyonight = {
+      name = "Tokyo Night";
+      description = "Vibrant dark theme inspired by Tokyo's neon-lit night skyline";
+      category = "dark";
+      tags = [ "vibrant" "colorful" "neon" "popular" "programmer-friendly" ];
     };
   };
 
