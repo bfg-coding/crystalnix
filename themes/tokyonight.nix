@@ -394,7 +394,7 @@
       ];
 
       mono = [
-        "JetBrains Mono"
+        "JetBrainsMono Nerd Font"
         "Fira Code"
         "SF Mono"
         "Monaco"
