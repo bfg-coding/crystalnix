@@ -20,13 +20,16 @@ rec {
   # Tokyo Night theme - vibrant, inspired by Tokyo's neon nights
   tokyonight = import ./tokyonight.nix { inherit lib; };
 
+  # Ratpoison theme - classic terminal mono-green aesthetic
+  ratpoison = import ./ratpoison.nix { inherit lib; };
+
   # ═══════════════════════════════════════════════════════════════════════════
   # THEME REGISTRY
   # ═══════════════════════════════════════════════════════════════════════════
 
   # All available themes
   all = {
-    inherit dark light tokyonight;
+    inherit dark light tokyonight ratpoison;
   };
 
   # List of theme names
@@ -66,6 +69,13 @@ rec {
       description = "Vibrant dark theme inspired by Tokyo's neon-lit night skyline";
       category = "dark";
       tags = [ "vibrant" "colorful" "neon" "popular" "programmer-friendly" ];
+    };
+
+    ratpoison = {
+      name = "Ratpoison";
+      description = "Classic terminal mono-green theme inspired by old-school CRT monitors";
+      category = "dark";
+      tags = [ "terminal" "mono-green" "retro" "minimal" "hacker" ];
     };
   };
 
